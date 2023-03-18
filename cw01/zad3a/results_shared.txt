@@ -1,0 +1,23 @@
+Enter a command: 
+Array initialized
+Real time is commented - some mysterious error, user time is: 0.0000000000, system time is 0.0000000000Enter a command: 
+Real time is commented - some mysterious error, user time is: 0.0000000000, system time is 0.0000000000Enter a command: 
+Real time is commented - some mysterious error, user time is: 0.0000000000, system time is 0.0000000000Enter a command: 
+Real time is commented - some mysterious error, user time is: 0.0000000000, system time is 0.0000000000Enter a command: 
+This is the array:
+ 134  344 3920 ../zad2/test.c
+Real time is commented - some mysterious error, user time is: 0.0000000000, system time is 0.0000000000Enter a command: 
+This is the array:
+ 107  242 2273 ../zad1/libwc_array.c
+Real time is commented - some mysterious error, user time is: 0.0000000000, system time is 0.0000000000Enter a command: 
+This is the array:
+ 161  444 5131 ../zad2/test_dyn.c
+Real time is commented - some mysterious error, user time is: 0.0000000000, system time is 0.0000000000Enter a command: 
+Blocks at index 2 deleted
+Real time is commented - some mysterious error, user time is: 0.0000000000, system time is 0.0000000000Enter a command: 
+Blocks at index 1 deleted
+Real time is commented - some mysterious error, user time is: 0.0000000000, system time is 0.0000000000Enter a command: 
+Blocks at index 0 deleted
+Real time is commented - some mysterious error, user time is: 0.0000000000, system time is 0.0000000000Enter a command: 
+Array destroyed
+Real time is commented - some mysterious error, user time is: 0.0000000000, system time is 0.0000000000Enter a command: 

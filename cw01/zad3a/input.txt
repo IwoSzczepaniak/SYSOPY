@@ -1,0 +1,12 @@
+init 10
+count ../zad2/test.c 
+count ../zad1/libwc_array.c 
+count ../zad2/test_dyn.c
+show 0 
+show 1
+show 2
+delete 2
+delete 1
+delete 0
+destroy 
+exit 
