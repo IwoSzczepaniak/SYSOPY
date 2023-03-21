@@ -14,8 +14,7 @@ test:
 	@echo "\n"
 	./main ../.. "zadanie"
 	@echo "\n"
-	./main /mnt/c/Users/iwosz "#include"
-	# ./main ../../../.. "#include"
+	./main ../../../.. "#include"
 
 
 clean:
