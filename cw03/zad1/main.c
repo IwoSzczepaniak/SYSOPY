@@ -4,20 +4,25 @@
 #include <sys/wait.h>
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
+    if (argc != 2) 
+    {
         fprintf(stderr, "Usage: <num_processes>\n");
         exit(1);
     }
 
     int num_processes = atoi(argv[1]);
 
-    for (int i = 0; i < num_processes; i++) {
+    for (int i = 0; i < num_processes; i++) 
+    {
         pid_t pid = fork();
 
-        if (pid == -1) {
+        if (pid == -1) 
+        {
             perror("fork");
             exit(1);
-        } else if (pid == 0) {
+        } 
+        else if (pid == 0) 
+        {
             printf("Parent process ID: %d, child process ID: %d\n", getppid(), getpid());
             exit(0);
         }
