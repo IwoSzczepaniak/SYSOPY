@@ -5,9 +5,8 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <linux/limits.h>
-#include <stdbool.h>
 
-#define MAX_DIRS 1000
+#define MAX_DIRS 50
 static char visited_dirs[MAX_DIRS][PATH_MAX];
 static int visited_dirs_count = 0;
 
@@ -57,13 +56,13 @@ int print_file(const char* path, const char* filename, const char* char_chain)
 
 
 
-bool is_visited_dir(const char *path) {
+int is_visited_dir(const char *path) {
     for (int i = 0; i < visited_dirs_count; i++) {
         if (strcmp(path, visited_dirs[i]) == 0) {
-            return true;
+            return 1;
         }
     }
-    return false;
+    return 0;
 }
 
 void mark_visited_dir(const char *path) {
@@ -81,7 +80,7 @@ void mark_visited_dir(const char *path) {
 void traverse_directory(const char* path, const char* char_chain)
 {
 
-    if (is_visited_dir(path)) {
+    if (is_visited_dir(path) == 1) {
         return;
     }
     mark_visited_dir(path);
