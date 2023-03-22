@@ -7,51 +7,6 @@
 #include <linux/limits.h>
 
 
-int is_directory(const char* path)
-{
-    struct stat statbuf;
-    if (stat(path, &statbuf) == -1)
-    {
-        perror(path);
-        exit(1);
-    }
-
-    return S_ISDIR(statbuf.st_mode);
-}
-
-int print_file(const char* path, const char* filename, const char* char_chain)
-{
-    struct stat statbuf;
-    if (stat(path, &statbuf) == -1)
-    {
-        perror(path);
-        exit(1);
-    }
-
-    if (S_ISREG(statbuf.st_mode) && statbuf.st_size < PATH_MAX)
-    {
-        FILE* fp = fopen(path, "r");
-        if (!fp)
-        {
-            perror(path);
-            exit(1);
-        }
-
-        char buffer[PATH_MAX];
-        if (fgets(buffer, sizeof(buffer), fp) != NULL && strncmp(buffer, char_chain, strlen(char_chain)) == 0)
-        {
-            printf("%s %d\n", path, getpid());
-        }
-
-        fclose(fp);
-    }
-
-    return 0;
-}
-
-
-
-
 void traverse_directory(const char* path, const char* char_chain)
 {
     DIR* dir = opendir(path);
@@ -72,7 +27,14 @@ void traverse_directory(const char* path, const char* char_chain)
             continue;
         }
 
-        if (is_directory(entry_path))
+        struct stat statbuf;
+        if (lstat(entry_path, &statbuf) == -1)
+        {
+            perror(entry_path);
+            exit(1);
+        }
+
+        if (S_ISDIR(statbuf.st_mode))
         {
             pid_t pid = fork();
             if (pid == -1)
@@ -86,15 +48,28 @@ void traverse_directory(const char* path, const char* char_chain)
                 exit(0);
             }
         }
-        else
+        
+        else if (S_ISREG(statbuf.st_mode) && statbuf.st_size < PATH_MAX)
         {
-            print_file(entry_path, entry->d_name, char_chain);
+            FILE* fp = fopen(entry_path, "r");
+            if (!fp)
+            {
+                perror(entry_path);
+                exit(1);
+            }
+
+            char buffer[PATH_MAX];
+            if (fgets(buffer, sizeof(buffer), fp) != NULL && strncmp(buffer, char_chain, strlen(char_chain)) == 0)
+            {
+                printf("%s %d\n", entry_path, getpid());
+            }
+
+            fclose(fp);
         }
     }
 
     closedir(dir);
 }
-
 
 
 int main(int argc, char* argv[])
@@ -106,6 +81,5 @@ int main(int argc, char* argv[])
     }
 
     traverse_directory(argv[1], argv[2]);
-
     return 0;
 }

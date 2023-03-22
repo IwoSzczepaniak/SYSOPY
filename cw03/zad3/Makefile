@@ -12,10 +12,23 @@ test:
 	@echo "\n"
 	./main . "#include"
 	@echo "\n"
-	./main ../.. "zadanie"
+	./main .. "#include"
 	@echo "\n"
-	./main ../../../.. "#include"
+	./main ../.. "#include"
 
+	@echo "\n"
+	./main . "asdf"
+	@echo "\n"
+	./main .. "asdf"
+	@echo "\n"
+	./main ../.. "asdf"
+
+	@echo "\n"
+	./main . "zadanie"
+	@echo "\n"
+	./main .. "zadanie"
+	@echo "\n"
+	./main ../.. "zadanie"
 
 clean:
 	rm -rf *.o $(PROGRAMS)
