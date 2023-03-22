@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -pedantic
 PROGRAMS = main
-
+START = ./main
 
 all:  $(PROGRAMS)
 
@@ -10,40 +10,47 @@ all:  $(PROGRAMS)
 
 test:
 	@echo "\n"
-	./main . "#include"
-	@sleep 1
-	@echo "\n"
-	./main .. "#include"
-	@sleep 1
-	@echo "\n"
-	./main ../.. "#include"
+	$(START) . "#include"
 	@sleep 1
 
 	@echo "\n"
-	./main . "asdf"
-	@sleep 1
-	@echo "\n"
-	./main .. "asdf"
-	
-	@echo "\n"
-	./main ../.. "asdf"
+	$(START) .. "#include"
 	@sleep 1
 
 	@echo "\n"
-	./main . "zadanie"
+	$(START) ../.. "#include"
 	@sleep 1
+
 	@echo "\n"
-	./main .. "zadanie"
+	$(START) . "asdf"
 	@sleep 1
+
 	@echo "\n"
-	./main ../.. "zadanie"
+	$(START) .. "asdf"
+	@sleep 1
+
+	@echo "\n"
+	$(START) ../.. "asdf"
+	@sleep 1
+
+	@echo "\n"
+	./$(PROGRAMS) . "zadanie"
+	@sleep 1
+
+	@echo "\n"
+	$(START) .. "zadanie"
+	@sleep 1
+
+	@echo "\n"
+	$(START) ../.. "zadanie"
 
 test2:
 	@echo "\n"
-	./main ~ "#include"
-	@sleep 1
-	@echo "\n*Permission denied should occur here*:\n"
-	./main /root "#include"
+	$(START) ~ "#include"
+	@sleep 2
+
+	@echo "\n*Permission denied* should occur here, for:"
+	$(START) /root "#include"
 
 
 clean:
