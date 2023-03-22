@@ -6,11 +6,6 @@
 #include <sys/stat.h>
 #include <linux/limits.h>
 
-#define MAX_DIRS 50
-static char visited_dirs[MAX_DIRS][PATH_MAX];
-static int visited_dirs_count = 0;
-
-
 
 int is_directory(const char* path)
 {
@@ -56,35 +51,9 @@ int print_file(const char* path, const char* filename, const char* char_chain)
 
 
 
-int is_visited_dir(const char *path) {
-    for (int i = 0; i < visited_dirs_count; i++) {
-        if (strcmp(path, visited_dirs[i]) == 0) {
-            return 1;
-        }
-    }
-    return 0;
-}
-
-void mark_visited_dir(const char *path) {
-    if (visited_dirs_count < MAX_DIRS) {
-        strcpy(visited_dirs[visited_dirs_count], path);
-        visited_dirs_count++;
-    } else {
-        fprintf(stderr, "Too many visited directories, stopping search.\n");
-        exit(1);
-    }
-}
-
-
 
 void traverse_directory(const char* path, const char* char_chain)
 {
-
-    if (is_visited_dir(path) == 1) {
-        return;
-    }
-    mark_visited_dir(path);
-
     DIR* dir = opendir(path);
     if (!dir)
     {
