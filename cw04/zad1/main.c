@@ -7,13 +7,47 @@
 #include <stdlib.h>
 #include <string.h>
 
-sigset_t mask;
+sigset_t mask, oldmask;
 
 void handler(int sig)
 {
-    printf("Received signal %d\n", sig);
+    printf("Handler received signal: %d\n", sig);
 }
 
+void check(char* argv[], char* pname){
+    if (strcmp(argv[1], "mask") == 0)
+    {
+        if(sigismember(&mask, SIGUSR1) == 1)
+        {
+            printf("Signal was blocked - %s\n", pname);
+        }
+        else
+        {
+            printf("Signal was not blocked - %s\n", pname);
+        }
+
+    }
+
+    else if (strcmp(argv[1], "pending") == 0)
+    {
+        if (sigpending(&mask) < 0)
+        {
+            printf("Error in sigpending\n");
+            exit(1);
+        }
+        else
+        {
+            if(sigismember(&mask, SIGUSR1) == 1)
+            {
+                printf("Signal is pending - %s\n", pname);
+            }
+            else
+            {
+                printf("Signal is not pending - %s\n", pname);
+            }
+        }
+    }
+}
 
 int main(int argc, char* argv[])
 {
@@ -35,67 +69,47 @@ int main(int argc, char* argv[])
 
     else if (strcmp(argv[1], "mask") == 0)
     {
-        signal(SIGUSR1, handler);
+        // signal(SIGUSR1, handler);
         sigemptyset(&mask);
         sigaddset(&mask, SIGUSR1);
         if (sigprocmask(SIG_BLOCK, &mask, NULL) < 0)
         {
-            perror("Signal was not blocked\n");
+            printf("Error in sigprocmask\n");
             exit(1);
         }
-        else
-        {
-            printf("Signal was blocked\n");
-        }
+
     }
 
     else if (strcmp(argv[1], "pending") == 0)
     {
-        signal(SIGUSR1, handler);
-        sigemptyset(&mask);
-        sigaddset(&mask, SIGUSR1);
-        if (sigpending(&mask) == -1) perror("sigpending");
-        if (sigismember(&mask, SIGUSR1) == 1)
+        sigemptyset (&mask);
+        sigaddset (&mask, SIGUSR1);
+        if (sigprocmask(SIG_BLOCK, &mask, NULL) < 0)
         {
-            printf("SIGUSR1 is pending\n");
-        }
-        else
-        {
-            printf("SIGUSR1 is not pending\n");
+            printf("Error in sigprocmask\n");
+            exit(1);
         }
     }
     
     raise(SIGUSR1);
-    sleep(1);
+    check(argv, "parent");
+
 
     int pid = fork();
     if (pid == -1) perror("fork");
 
     if (pid == 0)
     {
-        printf("Child process\n");
-        sleep(1);
-        if (strcmp(argv[1], "pending") == 0)
-        {   
-            if (sigpending(&mask) == -1) perror("sigpending");
-            if (sigismember(&mask, SIGUSR1) == 1)
-            {
-                printf("SIGUSR1 is pending\n");
-            }
-            else
-            {
-                printf("SIGUSR1 is not pending\n");
-            }
-        }
-        else
-        {
-        raise(SIGUSR1);
-        }
-    }  
+        if (strcmp(argv[1], "ignore") != 0)printf("Now output from child process:\n");
+
+        if (strcmp(argv[1], "pending") != 0) raise(SIGUSR1);
+
+        check(argv, "child");
+    }
     
     else
     {
-        sleep(2);
+        sleep(1);
     }
 
     return 0;
