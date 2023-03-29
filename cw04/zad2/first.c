@@ -18,7 +18,7 @@ int main() {
     struct sigaction sa;
     sa.sa_sigaction = handler;
     sa.sa_flags = SA_SIGINFO;
-
+    
     if (sigaction(SIGTERM, &sa, NULL) == -1) {
         perror("sigaction");
         exit(EXIT_FAILURE);
@@ -35,8 +35,8 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    kill(getpid(), SIGTERM);
-    kill(getpid(), SIGINT);
-    kill(getpid(), SIGUSR1);
+    raise(SIGTERM);
+    raise(SIGINT);
+    raise(SIGUSR1);
     return 0;
 }

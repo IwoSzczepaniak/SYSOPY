@@ -9,9 +9,11 @@ all: $(PROGRAM)
 	@echo "Now type in ./main & and take PID"
 
 test:
-	@echo "Use this ID to kill process"
-	./main
-	
+	./first
+	@sleep 3
+	./second
+	@sleep 3
+	./third
 
 clean:
 	rm -f *.o $(PROGRAM)

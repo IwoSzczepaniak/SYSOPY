@@ -17,7 +17,8 @@ void handler(int sig)
 }
 
 
-int check(char* argv[], char* pname){
+int check(char* argv[], char* pname)
+{
     if (strcmp(argv[1], "ignore") == 0)
     {
         printf("Signal is being send and ignored\n");

@@ -52,7 +52,7 @@ int main()
     printf("Catcher PID: %d\n", getpid());
 
     struct sigaction sa;
-    sa.sa_flags = SA_SIGINFO;
+    sa.sa_flags = SA_SIGINFO | SA_NODEFER;
     sa.sa_sigaction = sigusr1_handler;
     sigemptyset(&sa.sa_mask);
     sigaddset(&sa.sa_mask, SIGUSR1);

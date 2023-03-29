@@ -5,9 +5,11 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+char* pname = "Parent";
+
 void handler(int signum)
 {
-    printf("Received signal %d\n", signum);
+    printf("%s process received signal %d\n", pname, signum);
 }
 
 int main() {
@@ -21,7 +23,7 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 2; i++)
     {
         pid = fork();
 
@@ -32,9 +34,10 @@ int main() {
         } 
         else if (pid == 0) 
         {
-            printf("Child process running, do some things:\n");
-            for(int i = 0; i < 5; i++) {
-                printf("Child process: %d\n", i);
+            pname = "Child";
+            printf("\n%s process running, do some things:\n", pname);
+            for(int i = 0; i < 2; i++) {
+                printf("Hi\n");
                 sleep(1);
             }
             sleep(1);
@@ -42,8 +45,10 @@ int main() {
         }
         else 
         {
-            printf("Parent process waiting\n");
-            pause();
+            printf("\n%s process waiting\n", pname);
+            wait(NULL);
+            printf("%s process recived information about closing child process\n", pname);
+            sleep(1);
         }
     }
     return 0;

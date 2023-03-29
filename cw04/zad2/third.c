@@ -12,17 +12,16 @@ void handler(int signum)
 int main() {
     struct sigaction sa;
     sa.sa_handler = handler;
-    sa.sa_flags = SA_RESTART;
+    sa.sa_flags = SA_RESETHAND;
+    sigemptyset(&sa.sa_mask);
+    sigaction(SIGINT, &sa, NULL);
 
-    if (sigaction(SIGINT, &sa, NULL) == -1) {
-        perror("sigaction");
-        exit(EXIT_FAILURE);
-    }
+    printf("Sending SIGINT:\n");
+    raise(SIGINT);
 
-   
-    printf("Waiting for signal...\n");
-    kill(getpid(), SIGINT);
-    sleep(1);
+    printf("Sending SIGINT again:\n");
+    raise(SIGINT);
+
     
 
     return 0;
