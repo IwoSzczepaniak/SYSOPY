@@ -1,2 +1,2 @@
 # SYSOPY
-Repository of the course "Operating Systems"("Systemy operacyjne") for the 4th semester at AGH Computer Science
+Repository of the Operating Systems course on the 4th semester of Computer Science studies at AGH
