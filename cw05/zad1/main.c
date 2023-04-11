@@ -55,13 +55,14 @@ int read_emails(Email* emails, int max_emails)
         Email email;
         while (fgets(token, sizeof(token), fp)) 
         {
-            if (strncmp(token, "From:", 5) == 0) {
-                sscanf(token, "From:%99s", email.from);
-            } else if (strncmp(token, "Subject:", 8) == 0) {
-                sscanf(token, "Subject:%199s", email.subject);
-            } else if (strncmp(token, "To:", 3) == 0) {
-                sscanf(token, "To:%99s", email.to);
-            } else if (strncmp(token, "Date:", 5) == 0) {
+            if (strncmp(token, "From:", 5) == 0)  sscanf(token, "From:%99s", email.from);
+            
+            else if (strncmp(token, "Subject:", 8) == 0) sscanf(token, "Subject:%199s", email.subject);
+            
+            else if (strncmp(token, "To:", 3) == 0) sscanf(token, "To:%99s", email.to);
+            
+            else if (strncmp(token, "Date:", 5) == 0) 
+            {
                 char day[4], month[4];
                 int date, year, hour, minute, second;
                 sscanf(token, "Date: %3s, %d %3s %d %d:%d:%d", day, &date, month, &year, &hour, &minute, &second);
@@ -82,8 +83,9 @@ void send_email(const char* to, const char* subject, const char* body)
     char cmd[MAX_CMD_LEN];
     sprintf(cmd, "echo \"%s\" | mail -s \"%s\" \"%s\"", body, subject, to);
     FILE* mail = popen(cmd, "w");
-    if (mail == NULL) {
-        fprintf(stderr, "Error: could not open mail program\n");
+    if (mail == NULL) 
+    {
+        perror("Mail program\n");
         exit(EXIT_FAILURE);
     }
     pclose(mail);
@@ -91,11 +93,12 @@ void send_email(const char* to, const char* subject, const char* body)
 
 int main(int argc, char** argv) 
 {
-    if (argc == 2) {
-        // użytkownik podał jeden argument - sortujemy wg. adresu e-mail lub daty
+    if (argc == 2) 
+    {
         if (strcmp(argv[1], "nadawca") == 0)  method = 1;
         else if (strcmp(argv[1], "data") == 0) method = 2;
-        else {
+        else 
+        {
             fprintf(stderr, "Invalid arguments\n");
             exit(EXIT_FAILURE);
         }
@@ -116,12 +119,14 @@ int main(int argc, char** argv)
 
     }
 
-    else if (argc == 4) {
+    else if (argc == 4) 
+    {
         // użytkownik podał trzy argumenty - wysyłamy e-mail
         send_email(argv[1], argv[2], argv[3]);
     }
 
-    else{
+    else
+    {
         perror("Use one arg: <data>/<nadawca> \nor three args: <EmailAdress> <Title> <Message>");
         return 1;
     }
