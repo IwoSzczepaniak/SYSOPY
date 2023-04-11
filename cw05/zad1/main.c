@@ -51,24 +51,21 @@ int read_emails(Email* emails, int max_emails)
     {
         if (count >= max_emails) break;
         
-        char* token;
+        char token[100];
         Email email;
-        char* line_ptr = line; // pointer to the current position in line
-        while ((token = strsep(&line_ptr, "|")) != NULL) {
-            // odczytujemy kolejne pola e-maila
-            if (strcmp(token, "") == 0) {
-                continue;
-            } else if (strncmp(token, "From:", 5) == 0) {
-                sscanf(token, "From: %99s", email.from);
-            } else if (strncmp(token, "To:", 3) == 0) {
-                sscanf(token, "To: %99s", email.to);
+        while (fgets(token, sizeof(token), fp)) 
+        {
+            if (strncmp(token, "From:", 5) == 0) {
+                sscanf(token, "From:%99s", email.from);
             } else if (strncmp(token, "Subject:", 8) == 0) {
-                sscanf(token, "Subject: %199s", email.subject);
+                sscanf(token, "Subject:%199s", email.subject);
+            } else if (strncmp(token, "To:", 3) == 0) {
+                sscanf(token, "To:%99s", email.to);
             } else if (strncmp(token, "Date:", 5) == 0) {
-                sscanf(token, "Date: %49s", email.date);
+                sscanf(token, "Date:%49s", email.date);
+                emails[count++] = email;
             }
         }
-        emails[count++] = email;
     }    
     pclose(fp);
 
@@ -102,7 +99,8 @@ int main(int argc, char** argv)
         int email_count = read_emails(emails, MAX_EMAILS);
         qsort(emails, email_count, sizeof(Email), email_compare);
 
-        for (int i = 0; i < email_count; i++) {
+        for (int i = 0; i < email_count; i++) 
+        {
             if (strcmp(emails[i].subject, "") != 0) 
             {
                 printf("From: %s, ", emails[i].from);
