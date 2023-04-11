@@ -62,7 +62,12 @@ int read_emails(Email* emails, int max_emails)
             } else if (strncmp(token, "To:", 3) == 0) {
                 sscanf(token, "To:%99s", email.to);
             } else if (strncmp(token, "Date:", 5) == 0) {
-                sscanf(token, "Date:%49s", email.date);
+                char day[4], month[4];
+                int date, year, hour, minute, second;
+                sscanf(token, "Date: %3s, %d %3s %d %d:%d:%d", day, &date, month, &year, &hour, &minute, &second);
+                char date_str[100];
+                sprintf(date_str, "%04d-%s-%02d %02d:%02d:%02d", year, month, date, hour, minute, second);
+                strcpy(email.date, date_str);
                 emails[count++] = email;
             }
         }
@@ -101,14 +106,11 @@ int main(int argc, char** argv)
 
         for (int i = 0; i < email_count; i++) 
         {
-            if (strcmp(emails[i].subject, "") != 0) 
-            {
-                printf("From: %s, ", emails[i].from);
-                printf("To: %s, ", emails[i].to);
-                printf("Subject: %s, ", emails[i].subject);
-                printf("Date: %s\n", emails[i].date);
-                printf("\n");
-            }
+            printf("From: %s, ", emails[i].from);
+            printf("To: %s, ", emails[i].to);
+            printf("Subject: %s, ", emails[i].subject);
+            printf("Date: %s\n", emails[i].date);
+            printf("\n");
         }
         free(emails);
 
