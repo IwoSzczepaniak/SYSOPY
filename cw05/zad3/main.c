@@ -11,8 +11,6 @@
 
 int main(int argc, char* argv[])
 {
-    printf("hi");
-
     if (argc != 3)
     {
         printf("Insert: %s <cell_size> <prog_num>\n", argv[0]);
@@ -29,21 +27,25 @@ int main(int argc, char* argv[])
 
     for (int i = 0; i < prog_num; i++)
     {
-        char i_str[32];
-        snprintf(i_str, sizeof(i_str), "%d", i);
+        int pid = fork();
+        if (pid == 0)
+        {
+            char i_str[32];
+            snprintf(i_str, sizeof(i_str), "%d", i);
+            char *args[] = {"./sub", i_str, argv[2], argv[1], myfifo, NULL};
+            execvp(args[0], args);
+        }
+        else
+        {
+            char arr1[64];
+            int fd = open(myfifo, O_RDONLY);
+            read(fd, arr1, sizeof(arr1));
+            close(fd);
 
-        char *args[] = {"./sub", i_str, argv[2], argv[1], myfifo, NULL};
-        execvp(args[0], args);
-
-
-        char arr1[64];
-        int fd = open(myfifo, O_RDONLY);
-        read(fd, arr1, sizeof(arr1));
-        close(fd);
-
-        double res;
-        sscanf(arr1, "%lf", &res);
-        result_sum += res;
+            double res;
+            sscanf(arr1, "%lf", &res);
+            result_sum += res;
+        }
     }
 
     unlink(myfifo);
