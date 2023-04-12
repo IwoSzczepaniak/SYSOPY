@@ -11,8 +11,5 @@ test:
 	./main 0.0005 2000 
 	./main 0.005 200 
 
-clean_raport:
-	rm -rf raport.txt
-
 clean:
 	rm -rf ./main raport.txt
