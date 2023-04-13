@@ -37,6 +37,15 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
+    struct msqid_ds reader;
+
+    msgctl(msgid, IPC_STAT, &reader);
+    printf("Comunicate number %d\n", reader.msg_qnum);
+    printf("Bite number %d\n", reader.msg_qbytes);
+    printf("Last pid %d\n", reader.msg_lspid);
+    
+
+
     struct msgbuf rcvnoo;
     struct msgbuf rcvnot;
 
@@ -54,7 +63,8 @@ int main(int argc, char* argv[])
     }
     printf("Second message: %s\n", rcvnot.mtext);
 
-    printf("%d\n", key);
+    msgctl(msgid, IPC_RMID, &reader);
+
     return 0;   
 }
 
