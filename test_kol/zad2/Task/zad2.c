@@ -8,45 +8,91 @@
 #include <sys/wait.h>
 
 int fd[2];
-/*program tworzy dwa procesy potomne. Proces macierzysty co sekundê wysy³a
-SIGUSR1 do procesu potomnego 1. Proces potomny 1 po otrzymaniu sygna³u przesy³a
-kolejn± liczbê przez potok nienazwany do procesu potomnego 2, który wyswietla
+int d = 0;
+int i = 0;
+
+/*program tworzy dwa procesy potomne. Proces macierzysty co sekundï¿½ wysyï¿½a
+SIGUSR1 do procesu potomnego 1. Proces potomny 1 po otrzymaniu sygnaï¿½u przesyï¿½a
+kolejnï¿½ liczbï¿½ przez potok nienazwany do procesu potomnego 2, ktï¿½ry wyswietla
 te liczbe */
 
 //
 //
+
+void handler(int sig)
+{
+  i++;
+}
+
 int main (int lpar, char *tab[]){
   pid_t pid1, pid2;
-  int d,i;
   //
   //
-  //
+  pipe(fd);
+  pid1 = fork();
+
   if (pid1<0){
     perror("fork");
-    return 0;
-  }else if (pid1==0){//proces 1
+    return 1;
+  }
+  else if (pid1==0){//proces 1
     close(fd[0]);
-    while(1);
-    return 0;
-  }else{
-    //
-    if (pid2<0){
-      perror("fork");
-      return 0;
-    }else if (pid2==0){//proces 2
-      close(fd[1]);
-      while(1){
-        //
-        printf("przyjeto %d bajtow, wartosc:%d\n",d,i);
+    signal(SIGUSR1, handler);
+    while(1)
+    {
+      wait(NULL);
+      if (d!=i)
+      {
+        d = i;
+        write(fd[1], &d, sizeof(d));
       }
+    }
+    close(fd[1]);
+    return 0;
+  }
+
+  else{
+    pid2 = fork();
+
+    if(pid2<0){
+      perror("fork");
+      return 1;
+    }
+
+    else if (pid2==0)
+    {//proces 2
+      close(fd[1]);
+      int res;
+      int prev_res = -1;
+      while(1){
+        read(fd[0], &res, sizeof(res));
+        if (res != prev_res)
+        {
+          printf("Otrzymano %d\n", res);
+          prev_res = res;
+        }
+      }
+      close(fd[0]);
       return 0;
     }
+
+    else {
+    close(fd[0]);
+    close(fd[1]);
+
+    while(1) {
+      //
+      printf("wyslano SIGUSR1\n");
+      sleep(1);
+      kill(pid1, SIGUSR1);
+      }
+    }
+
   }
-  close(fd[0]);
-  close(fd[1]);
-  while(1) {
-    //
-    printf("wyslano SIGUSR1\n");
-    sleep(1);
-  }
+
+  
+  
+  
+
+  return 0;
 }

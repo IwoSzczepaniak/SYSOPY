@@ -30,7 +30,7 @@ int main (int lpar, char *tab[]){
 
   char* myfifo = "./potok1";
 
-  fd = open(myfifo, 'w');
+  fd = open(myfifo, O_WRONLY);
   signal(SIGINT, handler);
 
   while(1) {

@@ -2,6 +2,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
+
 
 struct pak{
  int i;
@@ -10,7 +12,7 @@ struct pak{
 
 int main (int lpar, char *tab[]){
   int w1;
-  struct pak ob1;
+  struct pak ob1, ob2;
 // 1) utworzyc potok nazwany 'potok1'
 //
   char* myfifo = "potok1";
@@ -20,8 +22,12 @@ int main (int lpar, char *tab[]){
 // 2) wyswietlic obiekt otrzymany z potoku
 //
 //
-    read(myfifo, ob1, sizeof(ob1));
-    printf("otrzymano: %d %c\n",ob1.i,ob1.lit); fflush(stdout);
+    read(fd, &ob2, sizeof(ob2));
+    if (&ob1 != &ob2)
+    {
+      printf("otrzymano: %d %c\n",ob1.i,ob1.lit); fflush(stdout);
+      ob1 = ob2;
+    }
   }
 
   close(fd);
