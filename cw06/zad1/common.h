@@ -5,7 +5,7 @@
 #include <time.h>
 #include <signal.h>
 
-#define MAX_SIZE 64
+#define MAX_SIZE 128
 #define MAX_CLIENTS 4
 #define MY_SERVER_ID 1
 #define PATH getenv("HOME")

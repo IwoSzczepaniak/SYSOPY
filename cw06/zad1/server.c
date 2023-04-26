@@ -33,6 +33,7 @@ int main()
 
     key_t queueKey = ftok(PATH, MY_SERVER_ID);
     CommandBuff *mybuff = malloc(sizeof(CommandBuff));
+    
     server_queue = msgget(queueKey, IPC_CREAT | 0666);
     if (server_queue == -1) {
         perror("msgget");
@@ -43,38 +44,38 @@ int main()
 
     signal(SIGINT, stop_server);
 
-    while (1) {
-
+    while (1) 
+    {
         msgrcv(server_queue, mybuff, sizeof(CommandBuff), -6, 0);
 
     
         if (mybuff->command == 5) 
         {
-            printf("Init command has been recieved\n");
+            printf("Init command has been received\n");
             init(mybuff);
         
         }
         else if (mybuff->command == 1)
         {
-            printf("List command has been recieved\n");
+            printf("List command has been received\n");
             list(mybuff);
         
         }
         else if (mybuff->command == 2)
         {
-            printf("To all command has been recieved\n");
+            printf("To all command has been received\n");
             to_all(mybuff);
         
         }
         else if (mybuff->command == 3)
         {
-            printf("To one command has been recieved\n");
+            printf("To one command has been received\n");
             to_one(mybuff);
         
         }
         else if (mybuff->command == 4) 
         {
-            printf("Stop(client) command has been recieved\n");
+            printf("Stop(client) command has been received\n");
             stop_client(mybuff);
         
         }

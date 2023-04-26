@@ -9,7 +9,7 @@
 #include <time.h>
 #include "common.h"
 
-key_t queueKey;
+key_t queueKey, serverKey;
 int queueID, serverID, clientID;
 
 int init();
@@ -22,8 +22,8 @@ void handle_server_message();
 int main()
 {
     queueKey = ftok(PATH , getpid());
+    serverKey = ftok(PATH, MY_SERVER_ID);
     queueID = msgget(queueKey, IPC_CREAT | 0666);
-    key_t serverKey = ftok(PATH, MY_SERVER_ID);
     serverID = msgget(serverKey, 0);
     clientID = init();
 
@@ -31,8 +31,8 @@ int main()
     ssize_t command_size;
     char* command = NULL;
 
-    handle_server_message();
     signal(SIGINT, stop_client);
+    handle_server_message();
 
 
     while(1)
@@ -70,11 +70,11 @@ int main()
         else if(strcmp(current , "2ONE") == 0)
         {
             current = strtok(NULL, " ");
-            int reciever = atoi(current);
-            printf("%d\n" , reciever);
+            int receiver = atoi(current);
+            printf("%d\n" , receiver);
             current = strtok(NULL, " ");
 
-            to_one(current , reciever);
+            to_one(current , receiver);
         
         }
 
@@ -102,7 +102,7 @@ void handle_server_message()
 {
     CommandBuff *mybuff = malloc(sizeof(CommandBuff));
 
-    if(msgrcv(queueID, mybuff, sizeof(CommandBuff),0,IPC_NOWAIT) >= 0 )
+    if(msgrcv(queueID, mybuff, sizeof(CommandBuff),0 ,IPC_NOWAIT) >= 0 )
     {
         if(mybuff->command == 4)
         {
@@ -151,7 +151,7 @@ void list()
     mybuff->command = 1;
 
     msgsnd(serverID, mybuff, sizeof(CommandBuff),0);
-    msgrcv(queueID, mybuff, sizeof(CommandBuff),0,0);
+    msgrcv(queueID, mybuff, sizeof(CommandBuff), 1, IPC_NOWAIT);
 
     free(mybuff);
 }
