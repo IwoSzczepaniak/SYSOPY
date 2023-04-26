@@ -19,8 +19,6 @@ void to_one(char* message, int receiver);
 void stop_client();
 void handle_server_message();
 
-
-
 int main()
 {
     queueKey = ftok(PATH , getpid());
@@ -37,11 +35,13 @@ int main()
     signal(SIGINT, stop_client);
 
 
-    while(1){
+    while(1)
+    {
         printf("Type in command > ");
 
         command_size = getline(&command, &len, stdin);
-        if (command_size == -1) {
+        if (command_size == -1)
+        {
             perror("getline");
             exit(EXIT_FAILURE);
         }
@@ -102,7 +102,8 @@ void handle_server_message()
 {
     CommandBuff *mybuff = malloc(sizeof(CommandBuff));
 
-    if(msgrcv(queueID, mybuff, sizeof(CommandBuff),0,IPC_NOWAIT) >= 0 ){
+    if(msgrcv(queueID, mybuff, sizeof(CommandBuff),0,IPC_NOWAIT) >= 0 )
+    {
         if(mybuff->command == 4)
         {
             printf("STOP command has been recived , exiting\n");
@@ -151,7 +152,7 @@ void list()
 
     msgsnd(serverID, mybuff, sizeof(CommandBuff),0);
     msgrcv(queueID, mybuff, sizeof(CommandBuff),0,0);
-    
+
     free(mybuff);
 }
 

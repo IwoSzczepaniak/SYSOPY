@@ -23,11 +23,11 @@ void stop_client(CommandBuff *mybuff);
 void save_command(CommandBuff *mybuff);
 
 int main() 
-{
-    
+{   
     printf("Server is starting\n");
 
-    for (int i = 0 ; i < MAX_CLIENTS; i++){
+    for (int i = 0 ; i < MAX_CLIENTS; i++)
+    {
         client_queue[i]=-1;
     }
 
@@ -94,8 +94,10 @@ void stop_server()
 {
     CommandBuff *mybuff = malloc(sizeof(CommandBuff));
 
-    for (int i = 0 ; i < MAX_CLIENTS; i++){
-        if (client_queue[i] != -1){
+    for (int i = 0 ; i < MAX_CLIENTS; i++)
+    {
+        if (client_queue[i] != -1)
+        {
             mybuff->command = 4;
             int client_queueID = msgget(client_queue[i],0);
             msgsnd(client_queueID, mybuff,sizeof(CommandBuff),0);
@@ -113,12 +115,16 @@ void save_command(CommandBuff *mybuff)
     struct tm tmp_time = mybuff->time_struct;
     FILE *file = fopen("command_history.txt", "a");
 
-    switch (mybuff->command){
+    switch (mybuff->command)
+    {
         case 5:
         {
-            if(mybuff->client_ID == -1){
+            if(mybuff->client_ID == -1)
+            {
                 printf("Client limit has been reached\n");
-            }else{
+            }
+            else
+            {
                 printf("Server : New client has been initialized - Client ID: %d\n" ,mybuff->client_ID );
                 fprintf(file, "Server : New client has been initialized - Client ID: %d\n", mybuff->client_ID);
             }
@@ -156,7 +162,8 @@ void save_command(CommandBuff *mybuff)
 void init(CommandBuff *mybuff)
 {
     new_client_ID++;
-    if (new_client_ID < MAX_CLIENTS - 1){
+    if (new_client_ID < MAX_CLIENTS - 1)
+    {
         mybuff->client_ID = new_client_ID;
         client_queue[new_client_ID] = mybuff->queue_Key;
     }
@@ -168,39 +175,47 @@ void init(CommandBuff *mybuff)
 }
 
 
-void list(CommandBuff *mybuff){
-
-    for (int i = 0; i < MAX_CLIENTS; i++){
-            if(client_queue[i]!=-1){
-                printf("Client id: %d\n", i);
-            }
+void list(CommandBuff *mybuff)
+{
+    for (int i = 0; i < MAX_CLIENTS; i++)
+    {
+        if(client_queue[i]!=-1)
+        {
+            printf("Client id: %d\n", i);
         }
+    }
     int client_queueID = msgget(mybuff->queue_Key,0600);
     msgsnd(client_queueID, mybuff, sizeof (CommandBuff), 0);
     
     save_command(mybuff);
 }
 
-void to_all(CommandBuff *mybuff){
-    for(int i =0 ; i < MAX_CLIENTS ; i++){
-        if(client_queue[i] != -1 && mybuff->client_ID != i){
+void to_all(CommandBuff *mybuff)
+{
+    for(int i =0 ; i < MAX_CLIENTS ; i++)
+    {
+        if(client_queue[i] != -1 && mybuff->client_ID != i)
+        {
             int receiverqueueID = msgget(client_queue[i],0);
-            msgsnd(receiverqueueID,mybuff,sizeof(CommandBuff),0);
+            msgsnd(receiverqueueID,mybuff,sizeof(CommandBuff), 0);
         }
     }
     save_command(mybuff);
 }
 
-void to_one(CommandBuff *mybuff){
-    int receiverqueueID = msgget(client_queue[mybuff->receiver_ID],0);
-    msgsnd(receiverqueueID,mybuff,sizeof(CommandBuff),0);
+void to_one(CommandBuff *mybuff)
+{
+    int receiverqueueID = msgget(client_queue[mybuff->receiver_ID], 0);
+    msgsnd(receiverqueueID,mybuff,sizeof(CommandBuff), 0);
     save_command(mybuff);
 }
 
-void stop_client(CommandBuff *mybuff){
+void stop_client(CommandBuff *mybuff)
+{
     client_queue[mybuff->client_ID] = -1;
 
-    if(mybuff->client_ID < new_client_ID){
+    if(mybuff->client_ID < new_client_ID)
+    {
         new_client_ID = mybuff->client_ID;
     }
     save_command(mybuff);
