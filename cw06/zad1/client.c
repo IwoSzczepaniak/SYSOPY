@@ -9,9 +9,6 @@
 #include <time.h>
 #include "common.h"
 
-#define MY_SERVER_ID 1
-#define PATH getenv("HOME")
-
 key_t queueKey;
 int queueID, serverID, clientID;
 
@@ -24,45 +21,52 @@ void handle_server_message();
 
 
 
-int main(void)
+int main()
 {
     queueKey = ftok(PATH , getpid());
     queueID = msgget(queueKey, IPC_CREAT | 0666);
     key_t serverKey = ftok(PATH, MY_SERVER_ID);
-    serverID = msgget(serverKey, 0600);
-
-
+    serverID = msgget(serverKey, 0);
     clientID = init();
+
     size_t len = 0;
     ssize_t command_size;
     char* command = NULL;
 
+    handle_server_message();
     signal(SIGINT, stop_client);
+
 
     while(1){
         printf("Type in command > ");
+
         command_size = getline(&command, &len, stdin);
+        if (command_size == -1) {
+            perror("getline");
+            exit(EXIT_FAILURE);
+        }
         command[command_size-1] ='\0';
 
-        handle_server_message();
-
-        char *current = strtok(command," ");
-
-        
-        if (strcmp(current, "") == 0) 
+        if (strcmp(command, "") == 0) 
         {
             continue;
         }
+
+        char *current = strtok(command," ");
+       
+ 
         printf("%s\n" , current);
 
         if(strcmp(current , "LIST") == 0)
         {
             list();
         }
+
         else if(strcmp(current , "STOP") == 0)
         {
             stop_client();
         }
+
         else if(strcmp(current , "2ONE") == 0)
         {
             current = strtok(NULL, " ");
@@ -73,18 +77,23 @@ int main(void)
             to_one(current , reciever);
         
         }
+
         else if (strcmp(current , "2ALL") == 0)
         {
             current = strtok(NULL, " ");
             to_all(current);
         }
+
+        else if (strcmp(current , "READ") == 0)
+        {
+            handle_server_message();
+        }
+
         else
         {
             printf("Command has not been recognized\n");
         }
 
-
-       
     }
     return 0;
 }
@@ -93,22 +102,20 @@ void handle_server_message()
 {
     CommandBuff *mybuff = malloc(sizeof(CommandBuff));
 
-    if(msgrcv(queueID, mybuff, sizeof(CommandBuff),0,IPC_NOWAIT) == -1 ){
-        perror("msgrcv");
-        exit(EXIT_FAILURE);
+    if(msgrcv(queueID, mybuff, sizeof(CommandBuff),0,IPC_NOWAIT) >= 0 ){
+        if(mybuff->command == 4)
+        {
+            printf("STOP command has been recived , exiting\n");
+            stop_client();
+        }
+        else
+        {
+            struct tm tmp_time = mybuff -> time_struct;
+            printf("Client %d has sent a message at %02d:%02d:%02d \n", mybuff->client_ID,tmp_time.tm_hour,tmp_time.tm_min,tmp_time.tm_sec);
+            printf("Message : %s\n" , mybuff->message);
+        }
     }
-    if(mybuff->command == 4)
-    {
-    printf("STOP command has been recived , exiting\n");
-    stop_client();
-    }
-    else
-    {
-        struct tm tmp_time = mybuff -> time_struct;
-        printf("Client %d has sent a message at %02d:%02d:%02d \n", mybuff->client_ID,tmp_time.tm_hour,tmp_time.tm_min,tmp_time.tm_sec);
-        printf("Message : %s\n" , mybuff->message);
-    }
-    
+    free(mybuff);
 }
 
 int init()
@@ -126,6 +133,7 @@ int init()
 
     printf("My client ID is %d\n" , current_id);
 
+    free(mybuff);
     return current_id;
 }
 
@@ -143,6 +151,8 @@ void list()
 
     msgsnd(serverID, mybuff, sizeof(CommandBuff),0);
     msgrcv(queueID, mybuff, sizeof(CommandBuff),0,0);
+    
+    free(mybuff);
 }
 
 void to_all(char* message)
@@ -155,8 +165,9 @@ void to_all(char* message)
     mybuff->client_ID = clientID;
     mybuff->command = 2;
     strcpy(mybuff->message, message);
-
     msgsnd(serverID, mybuff, sizeof(CommandBuff),0);
+
+    free(mybuff);
 }
 
 void to_one(char* message, int receiver)
@@ -171,6 +182,8 @@ void to_one(char* message, int receiver)
     mybuff->command = 3;
     strcpy(mybuff->message, message);
     msgsnd(serverID, mybuff, sizeof(CommandBuff),0);
+
+    free(mybuff);
 }
 
 
@@ -186,7 +199,6 @@ void stop_client()
     msgsnd(serverID, mybuff, sizeof(CommandBuff),0);
     msgctl(queueID, IPC_RMID, NULL);
 
-    exit(0);
-
+    free(mybuff);
 }
 
