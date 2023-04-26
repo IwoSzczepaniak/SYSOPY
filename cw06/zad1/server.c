@@ -26,10 +26,7 @@ int main()
 {   
     printf("Server is starting\n");
 
-    for (int i = 0 ; i < MAX_CLIENTS; i++)
-    {
-        client_queue[i]=-1;
-    }
+    for (int i = 0 ; i < MAX_CLIENTS; i++) client_queue[i]=-1;
 
     key_t queueKey = ftok(PATH, MY_SERVER_ID);
     CommandBuff *mybuff = malloc(sizeof(CommandBuff));
@@ -48,45 +45,18 @@ int main()
     {
         msgrcv(server_queue, mybuff, sizeof(CommandBuff), -6, 0);
 
-    
-        if (mybuff->command == 5) 
-        {
-            printf("Init command has been received\n");
-            init(mybuff);
+        if (mybuff->command == 5) init(mybuff);
         
-        }
-        else if (mybuff->command == 1)
-        {
-            printf("List command has been received\n");
-            list(mybuff);
+        else if (mybuff->command == 1) list(mybuff);
         
-        }
-        else if (mybuff->command == 2)
-        {
-            printf("To all command has been received\n");
-            to_all(mybuff);
+        else if (mybuff->command == 2) to_all(mybuff);
         
-        }
-        else if (mybuff->command == 3)
-        {
-            printf("To one command has been received\n");
-            to_one(mybuff);
+        else if (mybuff->command == 3) to_one(mybuff);
         
-        }
-        else if (mybuff->command == 4) 
-        {
-            printf("Stop(client) command has been received\n");
-            stop_client(mybuff);
-        
-        }
-        else 
-        {
-            // If the message type is not recognized, send an error message back to the sender
-            // break;
-        }
-        
-        continue;
+        else if (mybuff->command == 4) stop_client(mybuff);
 
+        else perror("message type is not recognized");
+        
     }
     return 0;
 }
@@ -101,8 +71,8 @@ void stop_server()
         {
             mybuff->command = 4;
             int client_queueID = msgget(client_queue[i],0);
-            msgsnd(client_queueID, mybuff,sizeof(CommandBuff),0);
-            msgrcv(server_queue, mybuff,sizeof(CommandBuff),5,0);
+            msgsnd(client_queueID, mybuff,sizeof(CommandBuff), 0);
+            msgrcv(server_queue, mybuff,sizeof(CommandBuff), 5 ,0);
         }
 
     }
@@ -162,6 +132,7 @@ void save_command(CommandBuff *mybuff)
 
 void init(CommandBuff *mybuff)
 {
+    printf("Init command has been received\n");
     new_client_ID++;
     if (new_client_ID < MAX_CLIENTS - 1)
     {
@@ -178,6 +149,7 @@ void init(CommandBuff *mybuff)
 
 void list(CommandBuff *mybuff)
 {
+    printf("List command has been received\n");
     for (int i = 0; i < MAX_CLIENTS; i++)
     {
         if(client_queue[i]!=-1)
@@ -193,6 +165,7 @@ void list(CommandBuff *mybuff)
 
 void to_all(CommandBuff *mybuff)
 {
+    printf("To all command has been received\n");
     for(int i =0 ; i < MAX_CLIENTS ; i++)
     {
         if(client_queue[i] != -1 && mybuff->client_ID != i)
@@ -206,18 +179,32 @@ void to_all(CommandBuff *mybuff)
 
 void to_one(CommandBuff *mybuff)
 {
-    int receiverqueueID = msgget(client_queue[mybuff->receiver_ID], 0);
-    msgsnd(receiverqueueID,mybuff,sizeof(CommandBuff), 0);
-    save_command(mybuff);
+    if(client_queue[mybuff->receiver_ID] != -1 && mybuff->receiver_ID != mybuff->client_ID)
+    {
+        printf("To one command has been received\n");
+        int receiverqueueID = msgget(client_queue[mybuff->receiver_ID], 0);
+        msgsnd(receiverqueueID,mybuff,sizeof(CommandBuff), 0);
+
+        char * msg = "success";
+        strcpy(mybuff->message, msg);
+        int senderID = msgget(client_queue[mybuff->client_ID], 0);
+        msgsnd(senderID,mybuff,sizeof(CommandBuff), 0);
+        save_command(mybuff);
+    }
+    else
+    {
+        int senderID = msgget(client_queue[mybuff->client_ID], 0);
+        char * msg = "error";
+        strcpy(mybuff->message, msg);
+        msgsnd(senderID,mybuff,sizeof(CommandBuff), 0);
+    }
 }
 
 void stop_client(CommandBuff *mybuff)
 {
+    printf("Stop(client) command has been received\n");
+
     client_queue[mybuff->client_ID] = -1;
 
-    if(mybuff->client_ID < new_client_ID)
-    {
-        new_client_ID = mybuff->client_ID;
-    }
     save_command(mybuff);
 }

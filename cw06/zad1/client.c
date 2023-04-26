@@ -34,7 +34,6 @@ int main()
     signal(SIGINT, stop_client);
     handle_server_message();
 
-
     while(1)
     {
         printf("Type in command > ");
@@ -71,17 +70,30 @@ int main()
         {
             current = strtok(NULL, " ");
             int receiver = atoi(current);
-            printf("%d\n" , receiver);
-            current = strtok(NULL, " ");
+            if (current == NULL || receiver == 0) 
+            {
+                perror("Problem with receiver argument for 2ONE command.\n");
+            }            
+            else
+            {
+                printf("%d\n" , receiver);
+                current = strtok(NULL, " ");
 
-            to_one(current , receiver);
-        
+                to_one(current , receiver);
+            }
         }
 
         else if (strcmp(current , "2ALL") == 0)
         {
             current = strtok(NULL, " ");
-            to_all(current);
+            if (current == NULL) 
+            {
+                perror("Missing receiver argument for 2ALL command.\n");
+            }
+            else 
+            {
+                to_all(current);
+            }
         }
 
         else if (strcmp(current , "READ") == 0)
@@ -138,8 +150,6 @@ int init()
     return current_id;
 }
 
-
-
 void list()
 {
     time_t current_time = time(NULL);
@@ -182,7 +192,12 @@ void to_one(char* message, int receiver)
     mybuff->receiver_ID = receiver;
     mybuff->command = 3;
     strcpy(mybuff->message, message);
+
     msgsnd(serverID, mybuff, sizeof(CommandBuff),0);
+
+    msgrcv(queueID, mybuff, sizeof(CommandBuff),0, 0);
+    printf("Server return: %s\n" ,mybuff->message );
+
 
     free(mybuff);
 }
