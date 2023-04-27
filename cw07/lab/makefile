@@ -1,5 +1,6 @@
+PROG = main2
 all:
-	gcc main.c -o main
-	./main
+	gcc $(PROG).c -o $(PROG)
+	./$(PROG)
 clean:
-	rm -rf ./main
+	rm -rf ./$(PROG)
