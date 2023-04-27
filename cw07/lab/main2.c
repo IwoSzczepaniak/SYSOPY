@@ -27,7 +27,6 @@ int main(int argc, char* argv[])
         printf("Message %s\n", buff);
         shmdt(buff);
     }
-    
 
     return 0;   
 }
