@@ -14,8 +14,8 @@ int main(int argc, char* argv[])
 {
     key = ftok(".", 'p');
     id = shmget(key, sizeof(char)*20, IPC_CREAT|0666);
-
     shared_mem = shmat(id, NULL, 0);
+    
     strcpy(shared_mem, "cała na przód");
     shmdt(shared_mem);
 
