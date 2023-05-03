@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-Wall
 
-all: library progs test
+all: library progs
 	
 library:
 	$(CC) $(CFLAGS) -c shared_mem.c -o shared_mem.o
@@ -13,7 +13,7 @@ progs:
 	$(CC) $(CFLAGS) destroy.c -L. -lshared_mem -o destroy
 
 test:
-	./main
+	./main hello
 	./read
 	./destroy
 
