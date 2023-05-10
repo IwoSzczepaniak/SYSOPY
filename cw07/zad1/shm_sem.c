@@ -9,7 +9,7 @@
 #include <errno.h>
 #include <pthread.h>
 
-#include "shared_mem.h"
+#include "shm_sem.h"
 
 static int get_shared_block(char *filename, int size)
 {

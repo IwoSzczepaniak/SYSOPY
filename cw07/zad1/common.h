@@ -1,18 +1,16 @@
-#ifndef COMMON_LIB_H
-#define COMMON_LIB_H
-
 #define MAX_CLIENTS 20
-#define MAX_CUTTING_TIME 4
+#define MAX_CUTTING_TIME 2
 #define MAX_BARBERS 10
 
 typedef struct{
     int barber_semaphores[MAX_BARBERS];
+    int customer_semaphores[MAX_CLIENTS];
     int num_barbers;
     int num_chairs;
-    int num_waiting;
+    int queue_size;
     int num_customers;
     int waiting;
-    int barber_sleep_time; 
+    int num_clients;
 } Salon;
 
 typedef struct {
@@ -24,4 +22,3 @@ typedef struct {
     Salon *salon;
     int id;
 } CustomerThreadArgs;
-#endif
