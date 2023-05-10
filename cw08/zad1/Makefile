@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -pedantic -g
+CFLAGS = -Wall -pedantic
 
 all: life
 	

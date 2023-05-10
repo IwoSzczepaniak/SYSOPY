@@ -99,9 +99,5 @@ void update_grid(char *src, char *dst)
 
 void update_cell(int i, int j, char *src,char *dst)
 {
-
     dst[i * grid_width + j] = is_alive(i, j, src);
-
 }
-
-

@@ -22,7 +22,6 @@ typedef struct {
 	int y;
 } thread_data_t;
 
-
 void* start_cell(void* arg)
 {
     thread_data_t* data = (thread_data_t*) arg;
