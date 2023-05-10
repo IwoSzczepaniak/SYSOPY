@@ -16,7 +16,7 @@ void handler(int signum, siginfo_t* info, void* context)
 int main() {
     char *str_id;
     struct sigaction sa;
-    sa.sa_sigaction = handler;
+    sa.sa_sigaction = &handler;
     sa.sa_flags = SA_SIGINFO;
     
     if (sigaction(SIGTERM, &sa, NULL) == -1) {

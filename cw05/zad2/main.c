@@ -75,9 +75,9 @@ int main(int argc, char* argv[])
     clock_t end = clock();
 
     FILE *raport =fopen("raport.txt", "a"); 
-    fprintf(raport, "Cell size: %s, \t\tNumber of processes: %s", argv[1], argv[2]);
-    fprintf(raport, ", Result: %f", sum);
-    fprintf(raport, ", Time: %fs\n", (float)(end - start) / CLOCKS_PER_SEC);
+    fprintf(raport, "Cell size: %s, \tNumber of processes: %s", argv[1], argv[2]);
+    fprintf(raport, ", \tResult: %f", sum);
+    fprintf(raport, ", \tTime: %fs\n", (float)(end - start) / CLOCKS_PER_SEC);
 
     return 0;
 }

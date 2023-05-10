@@ -10,8 +10,8 @@ libwc_array.so: libwc_array.o
 	$(CC) -shared -o $@ $^ 
 
 %.o: %.c wc_array.h
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -c $@ 
 
 clean:
-	rm -f $(OBJ) libwc_array.a libwc_array.so
+	rm -f $(OBJ) libwc_array.a libwc_array.so libwc_array.o
 
