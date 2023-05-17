@@ -49,35 +49,35 @@ int main()
 
 void* santa_thread(void* arg)
 {
-    int flag = 1;
     while (!(reindeer_arrived == NUM_REINDEER && elves_handled == NUM_ELVES)) {
         pthread_mutex_lock(&santa_mutex);
-        
+        // printf("Niebsłużone elfy %d oraz nieobsłużone renifery %d\n", NUM_ELVES-elves_handled, NUM_REINDEER-reindeer_arrived);
         while (!(reindeer_arrived >= NUM_REINDEER || (elves_waiting >= 3 && elves_handled < NUM_ELVES))) {
             printf("Mikołaj: zasypiam\n");
             pthread_cond_wait(&santa_cond, &santa_mutex);
         }
         
-        if (reindeer_arrived >= NUM_REINDEER) {
+        if (reindeer_arrived == NUM_REINDEER) {
             printf("Mikołaj: budzę się\n");
             printf("Mikołaj: dostarczam zabawki\n");
             sleep(rand() % 3 + 2);
             reindeer_arrived = 0;
+            printf("Mikołaj: dostarczyłem zabawki\n");
             pthread_cond_broadcast(&reindeer_cond);
         } 
         
-        else if (elves_waiting >= 3 && elves_handled < NUM_ELVES) {
+        else if (elves_waiting == 3 && elves_handled < NUM_ELVES) {
             printf("Mikołaj: budzę się\n");
-            printf("Mikołaj: rozwiązuje problemy elfów\n");
+            printf("Mikołaj: rozwiązuję problemy elfów\n");
             sleep(rand() % 2 + 1);
-            // elves_handled += 3;
             elves_waiting -= 3;
             pthread_cond_broadcast(&elves_cond);
         }
         
         pthread_mutex_unlock(&santa_mutex);
     }
-    
+
+    printf("Mikołaj: wykonałem wszystkie moje zadania na ten rok! Dobranoc!\n");
     pthread_exit(NULL);
 }
 
@@ -86,7 +86,7 @@ void* reindeer_thread(void* arg)
 {
     int id = *((int*)arg);
     sleep(rand() % 6 + 5);
-    
+
     pthread_mutex_lock(&santa_mutex);
     printf("Renifer: czeka %d reniferów na Mikołaja, ID: %d\n", ++reindeer_arrived, id);
     
@@ -108,11 +108,10 @@ void* elf_thread(void* arg)
     int has_problem = 0;
     int self_solved = 0;
 
-    while (!has_problem) {
-        sleep(rand() % 4 + 2);
-        
+    while (!has_problem) {   
+        sleep(rand() % 4 + 2);   
         pthread_mutex_lock(&santa_mutex);
-        
+
         if (elves_waiting < 3) 
         {
             printf("Elf: czeka %d elfów na Mikołaja, ID: %d\n", ++elves_waiting, id);
@@ -133,7 +132,6 @@ void* elf_thread(void* arg)
             has_problem = 1;
             self_solved = 1;
             sleep(rand() % 2 + 1);
-            elves_handled++;
         }
         
         pthread_mutex_unlock(&santa_mutex);
@@ -141,20 +139,18 @@ void* elf_thread(void* arg)
     
     if (!self_solved)
     {
-        printf("Elf: Mikołaj rozwiązał problem, ID: %d\n", id);
-        
+     
         pthread_mutex_lock(&santa_mutex);
-        elves_handled++;
+        printf("Elf: Mikołaj rozwiązał problem, ID: %d\n", id);
         sleep(rand() % 2 + 1);
-
-        
-        if (elves_handled == NUM_ELVES) 
-        {
-            printf("Elf: wszystkie problemy elfów rozwiązane, ID: %d\n", id);
-            pthread_cond_broadcast(&elves_cond);
-        }
         
         pthread_mutex_unlock(&santa_mutex);
+    }   
+
+    if (elves_handled++ == NUM_ELVES) 
+    {
+        printf("Elf: wszystkie problemy elfów rozwiązane, ID: %d\n", id);
+        pthread_cond_broadcast(&elves_cond);
     }   
     pthread_exit(NULL);
 }

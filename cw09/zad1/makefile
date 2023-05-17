@@ -1,6 +1,7 @@
 PROG = main
+CFLAGS = -Wall -pthread
 all:
-	gcc $(PROG).c -o $(PROG)
+	gcc $(CFLAGS) $(PROG).c -o $(PROG)
 	./$(PROG)
 clean:
 	rm -rf $(PROG)
