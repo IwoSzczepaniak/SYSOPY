@@ -85,24 +85,7 @@ int main(int argc, char* argv[]) {
     }
 
     while (1) {
-        // Sending commands to the server
-        char command[BUFFER_SIZE];
-        memset(command, 0, sizeof(command));
-        fgets(command, sizeof(command), stdin);
-
-        if (strncmp(command, "STOP", 4) == 0) {
-            // Sending the STOP command to the server
-            send(socket_fd, command, strlen(command), 0);
-            break;
-        }
-
-
-        // write(socket_fd, command, strlen(command));
-        send(socket_fd, command, strlen(command) - 1, 0);
-
-        printf("Sent command to server: %s\n", command);
-
-        // Receiving response from the server
+          // Receiving response from the server
         char response[BUFFER_SIZE];
         memset(response, 0, sizeof(response));
         ssize_t bytes_received = recv(socket_fd, response, sizeof(response) - 1, 0);
@@ -115,8 +98,25 @@ int main(int argc, char* argv[]) {
             printf("Received the STOP command from the server\n");
             break;
         }
-
         printf("Response from server: %s\n", response);
+    
+
+        // Sending commands to the server
+        char command[BUFFER_SIZE];
+        memset(command, 0, sizeof(command));
+        fgets(command, sizeof(command), stdin);
+
+        if (strncmp(command, "STOP", 4) == 0) {
+            // Sending the STOP command to the server
+            send(socket_fd, command, strlen(command), 0);
+            break;
+        }
+
+        // write(socket_fd, command, strlen(command));
+        send(socket_fd, command, strlen(command) - 1, 0);
+
+        printf("Sent command to server: %s", command);
+
     }
 
     // Closing the connection
