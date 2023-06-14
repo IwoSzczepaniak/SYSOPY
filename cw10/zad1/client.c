@@ -7,6 +7,8 @@
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/epoll.h>
+
 
 #define BUFFER_SIZE 1024
 
@@ -28,7 +30,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // const char* name = argv[1];
+    char *name = argv[1];
     const char* connection_type = argv[2];
     const char* server_address = argv[3];
 
@@ -106,16 +108,25 @@ int main(int argc, char* argv[]) {
         memset(command, 0, sizeof(command));
         fgets(command, sizeof(command), stdin);
 
-        if (strncmp(command, "STOP", 4) == 0) {
+
+      if (strncmp(command, "STOP", 4) == 0) {
             // Sending the STOP command to the server
             send(socket_fd, command, strlen(command), 0);
             break;
         }
 
-        // write(socket_fd, command, strlen(command));
-        send(socket_fd, command, strlen(command) - 1, 0);
-
         printf("Sent command to server: %s", command);
+
+        // add on name of client
+        int i = 0;
+        while (name[i] != '\0') {
+            command[i + 5] = name[i];
+            i++;
+        }
+
+        write(socket_fd, command, strlen(command));
+        // send(socket_fd, command, strlen(command), 0);
+
 
     }
 

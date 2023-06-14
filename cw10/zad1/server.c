@@ -14,7 +14,7 @@
 
 typedef struct {
     int socket_fd;
-    char name[20];
+    char name[BUFFER_SIZE];
 } Client;
 
 int num_clients = 0;
@@ -46,7 +46,7 @@ void handle_interruption(int signum) {
 
 void handle_client_message(int client_index, char* message) {
     // Handling commands from the client
-    printf("Received message from client %s: %s\n", clients[client_index].name, message);
+    printf("Received message from client: %d %s\n", client_index, message);
 
     if (strncmp(message, "LIST", 4) == 0) {
         // Sending the list of active clients to the client
@@ -109,6 +109,7 @@ int main(int argc, char* argv[]) {
 
     // Initializing the interruption handler
     signal(SIGINT, handle_interruption);
+    
 
     // Initializing the epoll mechanism
     epoll_fd = epoll_create1(0);
@@ -147,10 +148,10 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        event.events = EPOLLIN | EPOLLRDHUP;
+        event.events = EPOLLIN|EPOLLOUT;
         event.data.fd = server_socket_fd;
         if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, server_socket_fd, &event) == -1) {
-            perror("Epoll control failed for local socket");
+            perror("Epoll control failed for network socket");
             return 1;
         }
     }
@@ -181,7 +182,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        event.events = EPOLLIN;
+        event.events = EPOLLIN|EPOLLOUT;
         event.data.fd = local_socket_fd;
         if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, local_socket_fd, &event) == -1) {
             perror("Epoll control failed for local socket");
@@ -197,7 +198,7 @@ int main(int argc, char* argv[]) {
     char buffer[BUFFER_SIZE];
 
     while (1) {
-        int num_events = epoll_wait(epoll_fd, events, MAX_CLIENTS + 2, 1);
+        int num_events = epoll_wait(epoll_fd, events, MAX_CLIENTS + 2, -1);
         if (num_events == -1) {
             perror("Epoll wait failed");
             break;
@@ -247,6 +248,15 @@ int main(int argc, char* argv[]) {
                     num_clients++;
                     printf("New client connected\n");
                     send(client_socket_fd, init_message, strlen(init_message), 0);
+                    
+                    // add event and epoll_ctl
+                    event.events = EPOLLIN|EPOLLOUT;
+                    event.data.fd = client_socket_fd;
+                    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_socket_fd, &event) == -1) {
+                        perror("Epoll control failed for local socket");
+                        return 1;
+                    }
+                    
                 }
                 else {
                     send(client_socket_fd, max_clients_message, strlen(max_clients_message), 0);
@@ -254,9 +264,9 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            else {
+            else
+            {
                 // Data received from a client
-                printf("Data received from a client\n");
                 int client_index = -1;
                 int client_socket_fd = events[i].data.fd;
                 for (int j = 0; j < num_clients; j++) {
@@ -267,10 +277,14 @@ int main(int argc, char* argv[]) {
                 }
 
                 if (client_index != -1) {
-                    int num_bytes = recv(client_socket_fd, buffer, BUFFER_SIZE, 0);
+                    int num_bytes = recv(client_socket_fd, buffer, BUFFER_SIZE - 1, 0);
                     if (num_bytes > 0) {
                         buffer[num_bytes] = '\0';
-                        printf("Message from client \"%s\": %s\n", clients[client_index].name, buffer);
+                        // save name assuming it starts on 5h letter
+                        strcpy(clients[client_index].name, buffer + 5);
+
+                        // cut buffer to 5th place
+                        buffer[5] = '\0';
                         handle_client_message(client_index, buffer);
                     }
                     else {
@@ -281,14 +295,24 @@ int main(int argc, char* argv[]) {
                         num_clients--;
                     }
                 }
-            }
+
+                // add event and epoll_ctl
+                event.events = EPOLLIN;
+                event.data.fd = client_socket_fd;
+                if (epoll_ctl(epoll_fd, EPOLL_CTL_MOD, client_socket_fd, &event) == -1) {
+                    perror("Epoll control failed for local socket");
+                    return 1;
+                }
+            }    
 
             
         }
     }
 
     // Closing the sockets
+    shutdown(server_socket_fd, SHUT_RDWR);
     close(server_socket_fd);
+    shutdown(local_socket_fd, SHUT_RDWR);
     close(local_socket_fd);
 
     // Removing the epoll descriptor
