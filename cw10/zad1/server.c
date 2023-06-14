@@ -147,7 +147,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        event.events = EPOLLIN;
+        event.events = EPOLLIN | EPOLLRDHUP;
         event.data.fd = server_socket_fd;
         if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, server_socket_fd, &event) == -1) {
             perror("Epoll control failed for local socket");
@@ -254,41 +254,35 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            else
-            {
-                printf("Message from client\n");
+            else {
                 // Data received from a client
+                printf("Data received from a client\n");
+                int client_index = -1;
                 int client_socket_fd = events[i].data.fd;
-                int num_bytes = recv(client_socket_fd, buffer, BUFFER_SIZE, 0);
-                if (num_bytes > 0) {
-                    buffer[num_bytes] = '\0';
-                    
-                    for (int j = 0; j < num_clients; j++) {
-                        if (clients[j].socket_fd == client_socket_fd) {
-                            if(read(client_socket_fd, buffer, BUFFER_SIZE) == -1) perror("Error receiving message");
-                            else 
-                            {
-                                printf("Message from client \"%s\"\n",buffer);
-                                handle_client_message(i, buffer);
-                            }
-                            break;
-                        }
+                for (int j = 0; j < num_clients; j++) {
+                    if (clients[j].socket_fd == client_socket_fd) {
+                        client_index = j;
+                        break;
                     }
-                    
                 }
-                else {
-                    // Client disconnected
-                    for (int j = 0; j < num_clients; j++) {
-                        if (clients[j].socket_fd == client_socket_fd) {
-                            printf("Client disconnected: %s\n", clients[j].name);
-                            clients[j] = clients[num_clients - 1];
-                            num_clients--;
-                            break;
-                        }
+
+                if (client_index != -1) {
+                    int num_bytes = recv(client_socket_fd, buffer, BUFFER_SIZE, 0);
+                    if (num_bytes > 0) {
+                        buffer[num_bytes] = '\0';
+                        printf("Message from client \"%s\": %s\n", clients[client_index].name, buffer);
+                        handle_client_message(client_index, buffer);
                     }
-                    close(client_socket_fd);
+                    else {
+                        // Client disconnected
+                        printf("Client disconnected: %s\n", clients[client_index].name);
+                        close(client_socket_fd);
+                        clients[client_index] = clients[num_clients - 1];
+                        num_clients--;
+                    }
                 }
             }
+
             
         }
     }
