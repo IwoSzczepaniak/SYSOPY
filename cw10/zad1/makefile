@@ -5,7 +5,7 @@ clean:
 	rm -rf server client command_history.txt
 
 test1:
-	./server 12345 /tmp/socket_path
+	./server 12345 /tmp/socket_path local
 test2:
 	./client Sema local /tmp/socket_path
 test3:
