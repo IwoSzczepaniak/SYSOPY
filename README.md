@@ -12,7 +12,8 @@ Labs done:
 - Lab7 - 50%
 - Lab8 - 70%
 - Lab9 - 100%
-- Lab10 = 50%
+- Lab10 - 50%
+
 Tests:
 - Test1 - 73%
 - Test2 - 70%
